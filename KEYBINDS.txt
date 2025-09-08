@@ -68,9 +68,13 @@ GIT
 
 TERMINAL
 --------
-<leader>tt     = toggle terminal (open/hide)
-Esc Esc        = hide terminal (go back to code)
-Ctrl+\         = hide terminal (alternative)
+<leader>tt     = toggle terminal (floating)
+<leader>tf     = floating terminal
+<leader>th     = horizontal terminal (bottom)
+<leader>tv     = vertical terminal (right side)
+<C-\>          = quick toggle terminal
+Esc            = exit terminal mode (in terminal)
+<C-h/j/k/l>    = navigate between terminal and windows
 
 DATABASE
 --------

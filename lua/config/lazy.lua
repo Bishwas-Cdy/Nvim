@@ -191,6 +191,46 @@ require("lazy").setup({
         })
       end,
     },
+    {
+      "akinsho/toggleterm.nvim",
+      version = "*",
+      config = function()
+        require("toggleterm").setup({
+          size = 20,
+          open_mapping = [[<c-\>]],
+          hide_numbers = true,
+          shade_terminals = true,
+          shading_factor = 2,
+          start_in_insert = true,
+          insert_mappings = true,
+          persist_size = true,
+          direction = "float",
+          close_on_exit = true,
+          shell = vim.o.shell,
+          float_opts = {
+            border = "curved",
+            winblend = 0,
+            highlights = {
+              border = "Normal",
+              background = "Normal",
+            },
+          },
+        })
+
+        -- Terminal keymaps
+        vim.keymap.set("n", "<leader>tt", ":ToggleTerm<CR>", { desc = "Toggle terminal" })
+        vim.keymap.set("n", "<leader>tf", ":ToggleTerm direction=float<CR>", { desc = "Float terminal" })
+        vim.keymap.set("n", "<leader>th", ":ToggleTerm direction=horizontal<CR>", { desc = "Horizontal terminal" })
+        vim.keymap.set("n", "<leader>tv", ":ToggleTerm direction=vertical size=80<CR>", { desc = "Vertical terminal" })
+        
+        -- Terminal mode keymaps
+        vim.keymap.set("t", "<esc>", [[<C-\><C-n>]], { desc = "Exit terminal mode" })
+        vim.keymap.set("t", "<C-h>", [[<Cmd>wincmd h<CR>]], { desc = "Terminal left" })
+        vim.keymap.set("t", "<C-j>", [[<Cmd>wincmd j<CR>]], { desc = "Terminal down" })
+        vim.keymap.set("t", "<C-k>", [[<Cmd>wincmd k<CR>]], { desc = "Terminal up" })
+        vim.keymap.set("t", "<C-l>", [[<Cmd>wincmd l<CR>]], { desc = "Terminal right" })
+      end,
+    },
     -- Add enhanced modules one by one
     { import = "plugins.luasnip-extended" },
     -- { import = "plugins.typescript-tools" }, -- DISABLED - broken
