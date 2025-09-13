@@ -67,63 +67,66 @@ return {
     config = function()
       local lint = require("lint")
       
-      lint.linters_by_ft = {
-        python = {"bandit", "semgrep"}, -- Security-focused linters
-        javascript = {"eslint", "semgrep"},
-        typescript = {"eslint", "semgrep"},
-        sh = {"shellcheck"},
-        dockerfile = {"hadolint"},
-        yaml = {"yamllint"},
-        json = {"jsonlint"},
-        sql = {"sqlfluff"},
-        go = {"golangci-lint", "gosec"}, -- Go security
-        rust = {"clippy"},
-        java = {"checkstyle", "spotbugs"},
-      }
+      -- Helper function to check if a linter is available
+      local function linter_available(name)
+        return vim.fn.executable(name) == 1
+      end
       
-      -- Custom security linters
-      lint.linters.bandit = {
-        cmd = "bandit",
-        stdin = false,
-        args = {
-          "-f", "json",
-          "-q",
-        },
-        stream = "stdout",
-        ignore_exitcode = true,
-        parser = function(output, bufnr)
-          local diagnostics = {}
-          local data = vim.json.decode(output)
-          
-          if data and data.results then
-            for _, result in ipairs(data.results) do
-              table.insert(diagnostics, {
-                bufnr = bufnr,
-                lnum = result.line_number - 1,
-                col = 0,
-                end_lnum = result.line_number - 1,
-                end_col = -1,
-                severity = vim.diagnostic.severity.WARN,
-                message = result.issue_text .. " (CWE: " .. result.issue_cwe.id .. ")",
-                source = "bandit",
-                code = result.test_id,
-              })
-            end
-          end
-          
-          return diagnostics
-        end,
-      }
+      -- Only configure linters that are actually installed
+      lint.linters_by_ft = {}
       
-      -- Auto-lint on save
+      -- JavaScript/TypeScript - only if eslint is available
+      if linter_available("eslint") then
+        lint.linters_by_ft.javascript = {"eslint"}
+        lint.linters_by_ft.typescript = {"eslint"}
+        lint.linters_by_ft.javascriptreact = {"eslint"}
+        lint.linters_by_ft.typescriptreact = {"eslint"}
+      end
+      
+      -- Python - only if tools are available
+      local python_linters = {}
+      if linter_available("bandit") then
+        table.insert(python_linters, "bandit")
+      end
+      if linter_available("flake8") then
+        table.insert(python_linters, "flake8")
+      end
+      if #python_linters > 0 then
+        lint.linters_by_ft.python = python_linters
+      end
+      
+      -- Shell scripts
+      if linter_available("shellcheck") then
+        lint.linters_by_ft.sh = {"shellcheck"}
+      end
+      
+      -- JSON
+      if linter_available("jsonlint") then
+        lint.linters_by_ft.json = {"jsonlint"}
+      end
+      
+      -- Auto-lint on save (with error handling)
       vim.api.nvim_create_autocmd({ "BufWritePost" }, {
         callback = function()
-          lint.try_lint()
+          local status, err = pcall(function()
+            lint.try_lint()
+          end)
+          if not status then
+            -- Silently ignore linting errors to avoid annoying popups
+            vim.notify("Linting failed: " .. tostring(err), vim.log.levels.DEBUG)
+          end
         end,
       })
       
       -- Manual lint command
-      vim.keymap.set("n", "<leader>ll", function() lint.try_lint() end, { desc = "Lint file" })
+      vim.keymap.set("n", "<leader>ll", function() 
+        local status, err = pcall(function()
+          lint.try_lint()
+        end)
+        if not status then
+          vim.notify("Linting failed: " .. tostring(err), vim.log.levels.WARN)
+        end
+      end, { desc = "Lint file" })
     end,
   },
   

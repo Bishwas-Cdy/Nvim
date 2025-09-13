@@ -33,10 +33,24 @@ o              = new line below
 O              = new line above
 Esc            = back to normal mode
 dd             = delete line
-yy             = copy line
-p              = paste
+yy             = copy line (goes to system clipboard)
+p              = paste (from system clipboard)
+P              = paste before cursor
 u              = undo
 Ctrl+r         = redo
+
+CLIPBOARD OPERATIONS
+-------------------
+yy             = copy line to system clipboard
+y              = copy selection (in visual mode)
+p              = paste from system clipboard
+P              = paste before cursor
+"+y            = explicitly copy to system clipboard
+"+p            = explicitly paste from system clipboard
+"*y            = copy to primary selection (Linux)
+"*p            = paste from primary selection (Linux)
+dd             = cut line (also goes to clipboard)
+x              = delete character (goes to clipboard)
 
 BUFFERS (OPEN FILES)
 -------------------
@@ -44,6 +58,9 @@ BUFFERS (OPEN FILES)
 Ctrl+6         = switch to last file
 :bd            = close current file
 :ls            = list all open files
+Alt+.           = next buffer
+Alt+,           = previous buffer
+:b <number>     = switch to buffer by number
 
 COMPLETION & SNIPPETS
 --------------------
@@ -75,6 +92,24 @@ TERMINAL
 <C-\>          = quick toggle terminal
 Esc            = exit terminal mode (in terminal)
 <C-h/j/k/l>    = navigate between terminal and windows
+
+How to stop a running process in terminal
+-----------------------------------------
+Ctrl+C         = send interrupt (in terminal mode, if supported)
+Esc            = exit terminal mode (to normal mode)
+:q!            = close terminal window (kills process)
+:bd!           = force close buffer (kills process)
+Ctrl+\ Ctrl+n  = exit terminal mode (then use :q! or :bd!)
+
+How to force kill a process started in terminal
+-----------------------------------------------
+:bd!           = force delete terminal buffer (should kill process)
+If process still running:
+  1. Open another terminal (outside nvim)
+  2. Run: ps aux | grep node   # or python, etc.
+  3. Find PID and run: kill -9 <PID>
+
+Tip: Some servers may fork/detach and need manual kill. Always check with ps aux if unsure.
 
 DATABASE
 --------
@@ -263,4 +298,25 @@ QUICK TIPS
 - Type :help followed by any command for more info
 - Most commands can be shortened (e.g., :w instead of :write)
 - Add ! to force commands (e.g., :q! to quit without saving)
-8. <leader>ca   - fix errors
+
+How to create a file in a nested subdirectory
+----------------------------------------------
+In Neovim:
+  :e B/b/c/newfile.txt   # Opens/creates file if folders exist
+If folders do NOT exist:
+  Open terminal (<leader>tt) and run:
+    mkdir -p B/b/c && touch B/b/c/newfile.txt
+  Then in Neovim:
+    :e B/b/c/newfile.txt
+
+Tip: Use `mkdir -p` to create all parent folders at once.
+
+How to create folders and files using Neo-tree (no terminal needed)
+------------------------------------------------------------------
+1. Open Neo-tree: <leader>e or <C-n>
+2. Navigate to parent folder
+3. Press 'a' to add
+   - To create folder: type 'b/c/' and press Enter
+   - To create file: type 'b/c/newfile.txt' and press Enter
+
+Tip: You can create nested folders and files in one step using Neo-tree's 'a' (add) command.

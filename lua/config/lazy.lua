@@ -14,6 +14,49 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+-- Enable system clipboard integration
+vim.opt.clipboard = "unnamedplus"
+
+-- Additional clipboard settings for better compatibility
+if vim.fn.has("wsl") == 1 then
+  vim.g.clipboard = {
+    name = "WslClipboard",
+    copy = {
+      ["+"] = "clip.exe",
+      ["*"] = "clip.exe",
+    },
+    paste = {
+      ["+"] = 'powershell.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
+      ["*"] = 'powershell.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
+    },
+    cache_enabled = 0,
+  }
+elseif vim.fn.executable("wl-copy") == 1 then
+  vim.g.clipboard = {
+    name = "wl-clipboard",
+    copy = {
+      ["+"] = "wl-copy",
+      ["*"] = "wl-copy",
+    },
+    paste = {
+      ["+"] = "wl-paste",
+      ["*"] = "wl-paste",
+    },
+  }
+elseif vim.fn.executable("xsel") == 1 then
+  vim.g.clipboard = {
+    name = "xsel",
+    copy = {
+      ["+"] = "xsel --nodetach -i -b",
+      ["*"] = "xsel --nodetach -i -p",
+    },
+    paste = {
+      ["+"] = "xsel -o -b",
+      ["*"] = "xsel -o -p",
+    },
+  }
+end
+
 -- Setup lazy.nvim with modular plugin imports
 require("lazy").setup({
   -- Load core plugins only to start
